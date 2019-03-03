@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+
+from easysnmp import Session
+from time import time,sleep
+import sys
+args = sys.argv[1].split(':')
+ip = args[0]
+port = int(args[1])
+comm = args[2]
+freq = float(sys.argv[2])
+interval = 1.0/freq
+sampsize = int(sys.argv[3])
+oids = ['1.3.6.1.2.1.1.3.0']
+oids += sys.argv[4:]
+nsamp = 0
+old = []
+session = Session(hostname=ip,remote_port=port,community=comm,version=2)
+oldtime = 0
+while (nsamp < sampsize):
+    reqtime = time()
+   # print(oids)
+    new = session.get(oids)
+    resptime = time()
+    if len(old)==len(new):
+        if freq>1:
+            timediff = reqtime - oldtime
+        else:
+            timediff1 = reqtime - oldtime
+            if timediff1!=0:
+                timediff = int(timediff1)
+            else:
+                timediff = int(interval)
+        for k in range(1,len(oids)):
+            rates = []
+            if new[k].snmp_type!="NOSUCHINSTANCE" and old[k].snmp_type!="NOSUCHINSTANCE":
+                newvalue = int(new[k].value)
+                oldvalue = int(old[k].value)
+                if newvalue>=oldvalue:
+                    rate = (newvalue-oldvalue)/timediff
+                    rates.append(rate)
+                else:
+                    if new[k].snmp_type == "COUNTER64" and old[k].snmp_type=="COUNTER64":
+                        rate = ((2**64+newvalue)-oldvalue)/timediff
+                        rates.append(rate)
+                    elif new[k].snmp_type == "COUNTER" and old[k].snmp_type == "COUNTER":
+                        rate = ((2**32+newvalue)-oldvalue)/timediff
+                        rates.append(rate)
+            else:
+                rates.append(new[k].value)
+        nsamp += 1
+        print (int(reqtime),'| '+' | '.join(map(str,rates)))
+    old = new[:]
+    oldtime = reqtime
+    if interval>time()-reqtime:
+        sleep(interval-time()+reqtime)
+    else:
+        pass
+
