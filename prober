@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-from easysnmp import Session
+from easysnmp import Session,exceptions
 from time import time,sleep
 import sys
 args = sys.argv[1].split(':')
@@ -14,45 +13,64 @@ oids = ['1.3.6.1.2.1.1.3.0']
 oids += sys.argv[4:]
 nsamp = 0
 old = []
+new = []
 session = Session(hostname=ip,remote_port=port,community=comm,version=2)
 oldtime = 0
+rates = []
+timeouts = 0      
+reboots = 0        
 while (nsamp < sampsize):
     reqtime = time()
    # print(oids)
-    new = session.get(oids)
+    try:
+        new = session.get(oids)
+    except exceptions.EasySNMPTimeoutError:
+        print('Timeout #',nsamp)
+        nsamp += 1
+        timeout += 1
+        continue
     resptime = time()
     if len(old)==len(new):
-        if freq>1:
-            timediff = reqtime - oldtime
+        if int(old[0].value)-int(new[0].value)>0:
+            print('Agent Rebooting')
+            reboots += 1
         else:
-            timediff1 = reqtime - oldtime
-            if timediff1!=0:
-                timediff = int(timediff1)
+            if freq>1:
+                timediff = reqtime-oldtime
             else:
-                timediff = int(interval)
-        for k in range(1,len(oids)):
-            rates = []
-            if new[k].snmp_type!="NOSUCHINSTANCE" and old[k].snmp_type!="NOSUCHINSTANCE":
-                newvalue = int(new[k].value)
-                oldvalue = int(old[k].value)
-                if newvalue>=oldvalue:
-                    rate = (newvalue-oldvalue)/timediff
-                    rates.append(rate)
+                timediff = reqtime - oldtime
+                if timediff!=0:
+                    timediff = int(timediff)
                 else:
-                    if new[k].snmp_type == "COUNTER64" and old[k].snmp_type=="COUNTER64":
-                        rate = ((2**64+newvalue)-oldvalue)/timediff
+                    timediff = int(interval)
+            for k in range(1,len(oids)):
+                if new[k].snmp_type!="NOSUCHINSTANCE" and old[k].snmp_type!="NOSUCHINSTANCE":
+                    newvalue = int(new[k].value)
+                    oldvalue = int(old[k].value)
+                    if newvalue>=oldvalue:
+                        rate = (newvalue-oldvalue)/timediff
                         rates.append(rate)
-                    elif new[k].snmp_type == "COUNTER" and old[k].snmp_type == "COUNTER":
-                        rate = ((2**32+newvalue)-oldvalue)/timediff
-                        rates.append(rate)
-            else:
-                rates.append(new[k].value)
+                    else:
+                        if new[k].snmp_type == "COUNTER64" and old[k].snmp_type=="COUNTER64":
+                            rate = ((2**64+newvalue)-oldvalue)/timediff
+                            rates.append(rate)
+                        elif new[k].snmp_type == "COUNTER" and old[k].snmp_type == "COUNTER":
+                            rate = ((2**32+newvalue)-oldvalue)/timediff
+                            rates.append(rate)
+                else:
+                    rates.append(new[k].value)
+            print (int(reqtime),'| '+' | '.join(map(str,rates)))
         nsamp += 1
-        print (int(reqtime),'| '+' | '.join(map(str,rates)))
+    rates.clear() #clean rates
     old = new[:]
     oldtime = reqtime
     if interval>time()-reqtime:
         sleep(interval-time()+reqtime)
     else:
         pass
+if timeouts>0:
+    print('Total number of timeouts:',timeouts)
+if reboots>0:
+    print('Total number of reboots:',reboots)
+
 
