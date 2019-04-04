@@ -17,8 +17,8 @@ new = []
 session = Session(hostname=ip,remote_port=port,community=comm,version=2)
 oldtime = 0
 rates = []
-timeouts = 0      
-reboots = 0        
+timeouts = 0
+reboots = 0
 while (nsamp < sampsize):
     reqtime = time()
    # print(oids)
@@ -61,7 +61,7 @@ while (nsamp < sampsize):
                     rates.append(new[k].value)
             print (int(reqtime),'| '+' | '.join(map(str,rates)))
         nsamp += 1
-    rates.clear() #clean rates
+    rates = [] #clean rates
     old = new[:]
     oldtime = reqtime
     if interval>time()-reqtime:
