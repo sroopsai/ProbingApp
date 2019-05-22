@@ -27,7 +27,7 @@ while (nsamp < sampsize):
     except exceptions.EasySNMPTimeoutError:
         print('Timeout #',nsamp)
         nsamp += 1
-        timeout += 1
+        timeouts += 1
         continue
     resptime = time()
     if len(old)==len(new):
