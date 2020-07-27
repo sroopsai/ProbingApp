@@ -10,7 +10,7 @@
 ### How to use it?
 - Simply clone the repository
 ```shell
-git clone [https://github.com/sroopsai/ProbingApp.git](https://github.com/sroopsai/ProbingApp.git)
+git clone https://github.com/sroopsai/ProbingApp.git
 ```
 - Run the command 
 ```shell
