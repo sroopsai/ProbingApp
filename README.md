@@ -9,11 +9,11 @@
 
 ### How to use it?
 - Simply clone the repository
-```bash
+```zsh
 git clone https://github.com/sroopsai/ProbingApp.git
 ```
 - Run the command 
-```bash
+```zsh
 python prober <ip>:<port> <OID-1> <OID-2> ... <OID-n>
 ```
 ### :thumbsup:
