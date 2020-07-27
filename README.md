@@ -8,7 +8,12 @@
 - NetSNMP
 
 ### How to use it?
-- Simply clone the repository -> git clone [https://github.com/sroopsai/ProbingApp.git](https://github.com/sroopsai/ProbingApp.git)
-- Run the command -> python prober &lt;ip&gt;:&lt;port&gt; &lt;OID-1&gt; &lt;OID-2&gt; ... &lt;OID-n&gt;
-
+- Simply clone the repository
+```shell
+git clone [https://github.com/sroopsai/ProbingApp.git](https://github.com/sroopsai/ProbingApp.git)
+```
+- Run the command 
+```shell
+python prober <ip>:<port> <OID-1> <OID-2> ... <OID-n>
+```
 ### :thumbsup:
