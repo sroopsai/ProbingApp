@@ -9,11 +9,11 @@
 
 ### How to use it?
 - Simply clone the repository
-```shell
+```bash
 git clone https://github.com/sroopsai/ProbingApp.git
 ```
 - Run the command 
-```shell
+```bash
 python prober <ip>:<port> <OID-1> <OID-2> ... <OID-n>
 ```
 ### :thumbsup:
